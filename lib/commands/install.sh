@@ -2,6 +2,8 @@ install_command() {
   local plugin_name=$1
   local full_version=$2
 
+  set_concurrency
+
   if [ "$plugin_name" = "" ] && [ "$full_version" = "" ]; then
     install_local_tool_versions
   else
@@ -9,6 +11,17 @@ install_command() {
   fi
 }
 
+set_concurrency() {
+  if which nproc > /dev/null 2>&1; then
+    ASFD_CONCURRENCY=$(nproc)
+  elif which nproc > /dev/null 2>&1; then
+    ASFD_CONCURRENCY=$(sysctl -n hw.ncpu)
+  elif [ -f /proc/cpuinfo ]; then
+    ASDF_CONCURRENCY=$(grep -c processor /proc/cpuinfo)
+  else
+    ASDF_CONCURRENCY=1
+  fi
+}
 
 install_local_tool_versions() {
   if [ -f $(pwd)/.tool-versions ]; then
